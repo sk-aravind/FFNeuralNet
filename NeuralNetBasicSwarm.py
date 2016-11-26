@@ -69,7 +69,33 @@ class BasicSwarm(object):
 
         self.num_evals += 1
         return score
-   
+
+    def evaluate(self, gvn, X, y, index):
+        score = self.eval_pnn(gvn[:], self.path, index, X, y)
+
+        # update swarm best using current scores
+        if score < self.s_best_score:
+            self.s_best_score = score
+            self.s_best_weight = np.copy(self.p_weight[index])
+
+        return score
+
+    def update(self, w, c1, c2, p_index, gbest=None):
+        if gbest is None:
+            gbest = self.s_best_weight
+
+        # update velocity
+        r1, r2 = self.rng.random_sample((self.path_len,)), self.rng.random_sample((self.path_len,))
+        v = (w * self.p_v[p_index]) + (c1 * r1 * (self.p_best_weights[p_index] - self.p_weight[p_index])) + (c2 * r2 * (gbest - self.p_weight[p_index]))
+
+        # velocity clamping to prevent explosions
+        v = np.clip(v, self.min_v, self.max_v, out=v)
+
+        # update position
+        p = self.p_weight[p_index] + v
+        p = np.clip(p, self.min_weight, self.max_weight, out=p)
+        self.p_weight[p_index] = p
+        self.p_v[p_index] = v
 
     def get_num_evals(self):
         return self.num_evals

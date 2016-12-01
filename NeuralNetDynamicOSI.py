@@ -91,6 +91,7 @@ class DynamicOSI(BasicOSI):
 
                     # evaluate each swarm
                     score = self.swarms[s_index].evaluate(W, X_train, y_train, p_index)
+                    print score 
 
                     # reconstruct gvn
                     Wn = self.reconstruct_gvn(W)
@@ -104,6 +105,7 @@ class DynamicOSI(BasicOSI):
                     if score < best_score:
                         W = Wn[:]
                         best_score = score
+                        x3 = best_score/3
                     if score < swarm_scores[s_index]:
                         swarm_scores[s_index] = score
 
@@ -111,7 +113,8 @@ class DynamicOSI(BasicOSI):
             window.append(best_score)
             r = linregress(range(self.window), list(window)[-self.window:])
             if self.verbose:
-                print j, best_score
+                print j, best_score , x3
+
 
             if r[0] >= 0 or best_score < 1e-3:
                 self.W = W

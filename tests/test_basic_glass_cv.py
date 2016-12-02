@@ -25,7 +25,7 @@ if __name__ == '__main__':
     X = np.genfromtxt('../data/glass.data', delimiter=',')[:, :-1]
     Y = np.genfromtxt('../data/glass.data', delimiter=',', usecols=[-1], dtype='str')
     le = LabelEncoder()
-    
+    y = le.fit_transform(Y)
 
     for w in params['window']:
         for p in params['num_particles']:
@@ -33,13 +33,13 @@ if __name__ == '__main__':
             sss = cv.StratifiedShuffleSplit(y, n_iter=5, test_size=0.5, random_state=rng)
             mses, accs, evals = [], [], []
             for train_index, test_index in sss:
-                mse, accs, ev = xval(BasicOSI(n_hidden=[6], num_particles=p, window=w, random_state=rng,
+                mse, acc, ev = xval(BasicOSI(n_hidden=[6], num_particles=p, window=w, random_state=rng,
                                              validation_size=0.33, verbose=False),
                                     X, y, train_index, test_index)
                 mses.append(mse)
                 accs.append(acc)
                 evals.append(ev)
-                mse, acc, ev = xval(BasicOSI(n_hidden=[4], num_particles=p, window=w, random_state=rng,
+                mse, acc, ev = xval(BasicOSI(n_hidden=[6], num_particles=p, window=w, random_state=rng,
                                              validation_size=0.33, verbose=False),
                                     X, y, test_index, train_index)
                 mses.append(mse)
@@ -48,6 +48,7 @@ if __name__ == '__main__':
             print ",".join(map(str, [w, p, np.mean(mses), np.mean(accs), np.mean(evals)]))
             f.write("\n" + ",".join(map(str, [w, p, np.mean(mses), np.mean(accs), np.mean(evals)])))
             f.write("\n" + ",".join(map(str, mses)))
+            f.write("\n" + ",".join(map(str, accs)))
             f.write("\n" + ",".join(map(str, evals)))
             f.flush()
     f.close()
